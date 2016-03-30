@@ -108,5 +108,14 @@ namespace Yatzhee
             var score = new YatzheeScorer().Score(roll, Category.LargeStraight);
             score.Should().Be(expectedScore);
         }
+
+        [TestCase("1,2,3,4,6", 0)]
+        [TestCase("1,1,3,3,3", 11)]
+        [TestCase("5,6,5,6,6", 28)]
+        public void ScoreFullHouse(string roll, int expectedScore)
+        {
+            var score = new YatzheeScorer().Score(roll, Category.FullHouse);
+            score.Should().Be(expectedScore);
+        }
     }
 }

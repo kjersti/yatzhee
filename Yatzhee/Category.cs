@@ -20,6 +20,7 @@ namespace Yatzhee
         public static Category FourOfAKind = new Count(4);
         public static Category SmallStraight = new DiceMatch(new [] {1,2,3,4,5});
         public static Category LargeStraight = new DiceMatch(new[] { 2,3,4,5,6 });
+        public static Category FullHouse = new Combine(new Count(3), new Count(2));
 
         public abstract Tuple<int, List<string>> Score(List<string> roll);
     }
