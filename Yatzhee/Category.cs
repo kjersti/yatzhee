@@ -15,12 +15,13 @@ namespace Yatzhee
         public static Category Sixes = new Sum(6);
 
         public static Category OnePair = new Count(2);
-        public static Category TwoPairs = new Combine(OnePair, OnePair);
+        public static Category TwoPairs = new Combine(new List<Category>() { OnePair, OnePair });
         public static Category ThreeOfAKind = new Count(3);
         public static Category FourOfAKind = new Count(4);
         public static Category SmallStraight = new DiceMatch(new [] {1,2,3,4,5});
         public static Category LargeStraight = new DiceMatch(new[] { 2,3,4,5,6 });
-        public static Category FullHouse = new Combine(new Count(3), new Count(2));
+        public static Category FullHouse = new Combine(new List<Category>() { ThreeOfAKind, OnePair });
+        public static Category Chance = new Combine(new List<Category>() { Ones, Twos, Threes, Fours, Fives, Sixes });
 
         public abstract Tuple<int, List<string>> Score(List<string> roll);
     }
@@ -91,21 +92,21 @@ namespace Yatzhee
 
     internal class Combine : Category
     {
-        private readonly Category _c1;
-        private readonly Category _c2;
+        private readonly List<Category> _categories;
 
-        protected internal Combine(Category c1, Category c2)
+        protected internal Combine(List<Category> categories)
         {
-            _c1 = c1;
-            _c2 = c2;
+            _categories = categories;
         }
 
         public override Tuple<int, List<string>> Score(List<string> roll)
         {
-            var score1 = _c1.Score(roll);
-            var score2 = _c2.Score(Subtract(roll, score1.Item2));
-
-            return new Tuple<int, List<string>>(score1.Item1 + score2.Item1, Subtract(roll, score1.Item2.Concat(score2.Item2)));
+            return _categories.Aggregate(new Tuple<int, List<string>>(0, new List<string>()),
+                (score, c) =>
+                {
+                    var newScore = c.Score(Subtract(roll, score.Item2));
+                    return new Tuple<int, List<string>>(score.Item1 + newScore.Item1, score.Item2.Concat(newScore.Item2).ToList());
+                });
         }
 
         private static List<string> Subtract(List<string> one, IEnumerable<string> subtract)
