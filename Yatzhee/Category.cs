@@ -15,6 +15,8 @@ namespace Yatzhee
 
         public static Category OnePair = new Count(2);
         public static Category TwoPairs = new Combine(OnePair, OnePair);
+        public static Category ThreeOfAKind = new Count(3);
+        public static Category FourOfAKind = new Count(4);
 
         public abstract Tuple<int, List<string>> Score(List<string> roll);
     }

@@ -70,5 +70,25 @@ namespace Yatzhee
             var score = new YatzheeScorer().Score(roll, Category.TwoPairs);
             score.Should().Be(expectedScore);
         }
+
+        [TestCase("1,2,3,4,5", 0)]
+        [TestCase("2,3,3,3,2", 9)]
+        [TestCase("5,5,4,5,4", 15)]
+        [TestCase("4,4,4,5,5", 12)]
+        public void ScoreThreeOfAKind(string roll, int expectedScore)
+        {
+            var score = new YatzheeScorer().Score(roll, Category.ThreeOfAKind);
+            score.Should().Be(expectedScore);
+        }
+
+        [TestCase("1,2,3,4,5", 0)]
+        [TestCase("2,3,3,3,3", 12)]
+        [TestCase("5,5,4,5,4", 0)]
+        [TestCase("4,4,4,4,4", 16)]
+        public void ScoreFourOfAKind(string roll, int expectedScore)
+        {
+            var score = new YatzheeScorer().Score(roll, Category.FourOfAKind);
+            score.Should().Be(expectedScore);
+        }
     }
 }
