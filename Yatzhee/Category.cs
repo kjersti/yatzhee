@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace Yatzhee
 {
@@ -15,13 +14,20 @@ namespace Yatzhee
         public static Category Sixes = new Sum(6);
 
         public static Category OnePair = new Count(2);
-        public static Category TwoPairs = new Combine(new List<Category>() { OnePair, OnePair });
+        public static Category TwoPairs = new Combine(new List<Category> { OnePair, OnePair });
         public static Category ThreeOfAKind = new Count(3);
         public static Category FourOfAKind = new Count(4);
-        public static Category SmallStraight = new DiceMatch(new [] {1,2,3,4,5});
-        public static Category LargeStraight = new DiceMatch(new[] { 2,3,4,5,6 });
-        public static Category FullHouse = new Combine(new List<Category>() { ThreeOfAKind, OnePair });
-        public static Category Chance = new Combine(new List<Category>() { Ones, Twos, Threes, Fours, Fives, Sixes });
+        public static Category SmallStraight = new Match(new [] {1,2,3,4,5});
+        public static Category LargeStraight = new Match(new[] { 2,3,4,5,6 });
+        public static Category FullHouse = new Combine(new List<Category> { ThreeOfAKind, OnePair });
+        public static Category Chance = new Combine(new List<Category> { Ones, Twos, Threes, Fours, Fives, Sixes });
+        public static Category Yatzhee = new Yatzhee();
+
+        public static Category[] Categories = {
+            Ones, Twos,Threes, Fours, Fives, Sixes,
+            OnePair, TwoPairs, ThreeOfAKind, FourOfAKind,
+            SmallStraight, LargeStraight, FullHouse, 
+            Chance, Yatzhee};
 
         public abstract Tuple<int, List<string>> Score(List<string> roll);
     }
@@ -38,7 +44,10 @@ namespace Yatzhee
         public override Tuple<int, List<string>> Score(List<string> roll)
         {
             var count = roll.Count(ch => _match == int.Parse(ch));
-            return new Tuple<int, List<string>>(count * _match, Enumerable.Repeat(_match.ToString(), count).ToList());
+
+            return new Tuple<int, List<string>>(
+                count * _match, 
+                Enumerable.Repeat(_match.ToString(), count).ToList());
         }
     }
 
@@ -66,11 +75,11 @@ namespace Yatzhee
         }
     }
 
-    internal class DiceMatch : Category
+    internal class Match : Category
     {
         private readonly int[] _values;
 
-        protected internal DiceMatch(int[] values)
+        protected internal Match(int[] values)
         {
             _values = values;
         }
@@ -90,6 +99,19 @@ namespace Yatzhee
         }
     }
 
+    internal class Yatzhee : Category
+    {
+        public override Tuple<int, List<string>> Score(List<string> roll)
+        {
+            var countDistinct = new HashSet<string>(roll).Count;
+
+            if (countDistinct != 1)
+                return new Tuple<int, List<string>>(0, new List<string>());
+
+            return new Tuple<int, List<string>>(50, roll);
+        }
+    }
+
     internal class Combine : Category
     {
         private readonly List<Category> _categories;
@@ -105,7 +127,10 @@ namespace Yatzhee
                 (score, c) =>
                 {
                     var newScore = c.Score(Subtract(roll, score.Item2));
-                    return new Tuple<int, List<string>>(score.Item1 + newScore.Item1, score.Item2.Concat(newScore.Item2).ToList());
+
+                    return new Tuple<int, List<string>>(
+                        score.Item1 + newScore.Item1, 
+                        score.Item2.Concat(newScore.Item2).ToList());
                 });
         }
 
