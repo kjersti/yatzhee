@@ -1,10 +1,12 @@
-﻿namespace Yatzhee
+﻿using System.Linq;
+
+namespace Yatzhee
 {
     public class YatzheeScorer
     {
         public int Score(string roll, Category category)
         {
-            return category.Score(roll);
+            return category.Score(roll.Split(',').ToList()).Item1;
         }
     }
 }

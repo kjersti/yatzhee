@@ -60,5 +60,15 @@ namespace Yatzhee
             var score = new YatzheeScorer().Score(roll, Category.OnePair);
             score.Should().Be(expectedScore);
         }
+
+        [TestCase("1,2,3,4,5", 0)]
+        [TestCase("2,3,3,3,2", 10)]
+        [TestCase("5,5,4,5,4", 18)]
+        [TestCase("5,5,5,5,5", 20)]
+        public void ScoreTwoPairs(string roll, int expectedScore)
+        {
+            var score = new YatzheeScorer().Score(roll, Category.TwoPairs);
+            score.Should().Be(expectedScore);
+        }
     }
 }

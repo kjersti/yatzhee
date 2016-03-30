@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Yatzhee
@@ -12,8 +14,9 @@ namespace Yatzhee
         public static Category Sixes = new Sum(6);
 
         public static Category OnePair = new Count(2);
+        public static Category TwoPairs = new Combine(OnePair, OnePair);
 
-        public abstract int Score(string roll);
+        public abstract Tuple<int, List<string>> Score(List<string> roll);
     }
 
     internal class Sum : Category
@@ -25,14 +28,10 @@ namespace Yatzhee
             _match = match;
         }
 
-        public override int Score(string roll)
+        public override Tuple<int, List<string>> Score(List<string> roll)
         {
-            return roll.Count(ch => ch == AsciiValue(_match)) * _match;
-        }
-
-        private static int AsciiValue(int v)
-        {
-            return v + '0';
+            var count = roll.Count(ch => _match == int.Parse(ch));
+            return new Tuple<int, List<string>>(count * _match, Enumerable.Repeat(_match.ToString(), count).ToList());
         }
     }
 
@@ -45,19 +44,48 @@ namespace Yatzhee
             _count = count;
         }
 
-        public override int Score(string roll)
+        public override Tuple<int, List<string>> Score(List<string> roll)
         {
             var highest = 
-                roll.Split(',')
-                .GroupBy(c => c)
+                roll.GroupBy(c => c)
                 .Where(grp => grp.Count() >= _count)
                 .OrderByDescending(grp => grp.Key)
                 .FirstOrDefault();
 
             if (highest == null)
-                return 0;
+                return new Tuple<int, List<string>>(0, new List<string>());
 
-            return int.Parse(highest.Key) * _count;
+            return new Tuple<int, List<string>>(int.Parse(highest.Key) * _count, Enumerable.Repeat(highest.Key, _count).ToList());
+        }
+    }
+
+    internal class Combine : Category
+    {
+        private readonly Category _c1;
+        private readonly Category _c2;
+
+        protected internal Combine(Category c1, Category c2)
+        {
+            _c1 = c1;
+            _c2 = c2;
+        }
+
+        public override Tuple<int, List<string>> Score(List<string> roll)
+        {
+            var score1 = _c1.Score(roll);
+            var score2 = _c2.Score(Subtract(roll, score1.Item2));
+
+            return new Tuple<int, List<string>>(score1.Item1 + score2.Item1, Subtract(roll, score1.Item2.Concat(score2.Item2)));
+        }
+
+        private static List<string> Subtract(List<string> one, IEnumerable<string> subtract)
+        {
+            foreach (var s in subtract)
+            {
+                one.Remove(s);
+            }
+
+            return one;
         }
     }
 }
