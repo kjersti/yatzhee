@@ -90,5 +90,14 @@ namespace Yatzhee
             var score = new YatzheeScorer().Score(roll, Category.FourOfAKind);
             score.Should().Be(expectedScore);
         }
+
+        [TestCase("1,2,3,4,6", 0)]
+        [TestCase("1,2,3,4,5", 15)]
+        [TestCase("2,3,4,5,6", 0)]
+        public void ScoreSmallStraight(string roll, int expectedScore)
+        {
+            var score = new YatzheeScorer().Score(roll, Category.SmallStraight);
+            score.Should().Be(expectedScore);
+        }
     }
 }

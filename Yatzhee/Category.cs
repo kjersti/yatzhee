@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Yatzhee
 {
@@ -17,6 +18,7 @@ namespace Yatzhee
         public static Category TwoPairs = new Combine(OnePair, OnePair);
         public static Category ThreeOfAKind = new Count(3);
         public static Category FourOfAKind = new Count(4);
+        public static Category SmallStraight = new DiceMatch(new [] {1,2,3,4,5});
 
         public abstract Tuple<int, List<string>> Score(List<string> roll);
     }
@@ -58,6 +60,30 @@ namespace Yatzhee
                 return new Tuple<int, List<string>>(0, new List<string>());
 
             return new Tuple<int, List<string>>(int.Parse(highest.Key) * _count, Enumerable.Repeat(highest.Key, _count).ToList());
+        }
+    }
+
+    internal class DiceMatch : Category
+    {
+        private readonly int[] _values;
+
+        protected internal DiceMatch(int[] values)
+        {
+            _values = values;
+        }
+
+        public override Tuple<int, List<string>> Score(List<string> roll)
+        {
+            var diceValues =
+                roll.Select(int.Parse)
+                    .OrderBy(v => v)
+                    .Take(_values.Length)
+                    .ToArray();
+
+            if (!_values.SequenceEqual(diceValues))
+                return new Tuple<int, List<string>>(0, new List<string>());
+
+            return new Tuple<int, List<string>>(_values.Sum(), _values.Select(v => v.ToString()).ToList());
         }
     }
 
